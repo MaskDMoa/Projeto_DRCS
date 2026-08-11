@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSlowLoad } from '../hooks/useSlowLoad';
 
+const Marquee = 'marquee' as any;
+
 export function ArchivistPage() {
   const { loading, progress } = useSlowLoad(300, 1500);
   const [visitorCount, setVisitorCount] = useState('00000');
@@ -75,10 +77,9 @@ export function ArchivistPage() {
             O Arquivo
           </h1>
           <div style={{ color: '#555', letterSpacing: '5px', margin: '15px 0' }}>~*~*~*~*~*~*~*~*~*~*~*~*~*~*~</div>
-          {/* @ts-ignore - marquee is obsolete but intended here */}
-          <marquee style={{ color: '#ffff00', width: '80%', padding: '5px', border: '1px dashed #444', display: 'inline-block' }}>
+          <Marquee style={{ color: '#ffff00', width: '80%', padding: '5px', border: '1px dashed #444', display: 'inline-block' }}>
             Bem-vindo. Nem tudo aqui é o que parece. A verdade está oculta nas entrelinhas.
-          </marquee>
+          </Marquee>
         </header>
 
         <section style={{ marginBottom: '40px', padding: '15px', border: '1px solid #333' }}>
