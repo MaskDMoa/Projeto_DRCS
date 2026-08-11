@@ -4,13 +4,15 @@ import { useBackButtonRitual } from '../hooks/useBackButtonRitual';
 export function BaitPage() {
   useBackButtonRitual(5, 5000, '/arquivista');
 
-  const defaultComments = [
+  type CommentType = { name: string; time: string; text: string; reply?: string };
+
+  const defaultComments: CommentType[] = [
     { name: 'Maria do Carmo', time: 'há 2 dias', text: 'Ficou maravilhoso! Meus netos adoraram, não sobrou nenhum pra contar história.' },
     { name: 'João Pedro', time: 'há 1 semana', text: 'Segui a receita passo a passo e deu super certo. Recomendo usar queijo canastra meia cura se tiverem, dá um toque especial.' },
     { name: 'Ana Lúcia', time: 'há 2 semanas', text: 'Dá para congelar a massa antes de assar?', reply: 'Pode sim, Ana! Congele as bolinhas separadas em uma forma e depois guarde em saquinhos. Vão direto do congelador pro forno. Ficam ótimos.' }
   ];
 
-  const [comments, setComments] = useState(() => {
+  const [comments, setComments] = useState<CommentType[]>(() => {
     const saved = localStorage.getItem('vovo_comments');
     if (saved) {
       try {
