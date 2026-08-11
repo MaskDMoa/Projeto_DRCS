@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { BaitPage } from './pages/BaitPage';
 import { ArchivistPage } from './pages/ArchivistPage';

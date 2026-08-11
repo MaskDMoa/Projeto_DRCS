@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSlowLoad } from '../hooks/useSlowLoad';
 
 export function ArchivistPage() {
@@ -75,6 +75,7 @@ export function ArchivistPage() {
             O Arquivo
           </h1>
           <div style={{ color: '#555', letterSpacing: '5px', margin: '15px 0' }}>~*~*~*~*~*~*~*~*~*~*~*~*~*~*~</div>
+          {/* @ts-ignore - marquee is obsolete but intended here */}
           <marquee style={{ color: '#ffff00', width: '80%', padding: '5px', border: '1px dashed #444', display: 'inline-block' }}>
             Bem-vindo. Nem tudo aqui é o que parece. A verdade está oculta nas entrelinhas.
           </marquee>
