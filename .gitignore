@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build scripts (not needed in deployment)
+create-zip.js
+create-zip.cjs
+create-zip.py

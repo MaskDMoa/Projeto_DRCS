@@ -1,46 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import { useBackButtonRitual } from '../hooks/useBackButtonRitual';
+import { supabase } from '../lib/supabase';
+
+type CommentType = { id?: number; name: string; time: string; text: string; reply?: string; is_default?: boolean };
+
+const defaultComments: CommentType[] = [
+  { name: 'Maria do Carmo', time: 'há 2 dias', text: 'Ficou maravilhoso! Meus netos adoraram, não sobrou nenhum pra contar história.', is_default: true },
+  { name: 'João Pedro', time: 'há 1 semana', text: 'Segui a receita passo a passo e deu super certo. Recomendo usar queijo canastra meia cura se tiverem, dá um toque especial.', is_default: true },
+  { name: 'Ana Lúcia', time: 'há 2 semanas', text: 'amei a receita! só uma coisa estranha, toda vez que eu tento sair dessa página e volto, ela parece um pouquinho diferente. deve ser só impressão minha 😅', is_default: true }
+];
+
+function timeAgo(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'agora mesmo';
+  if (diffMin < 60) return `há ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `há ${diffMonths} ${diffMonths > 1 ? 'meses' : 'mês'}`;
+}
 
 export function BaitPage() {
   useBackButtonRitual(5, 5000, '/arquivista');
 
-  type CommentType = { name: string; time: string; text: string; reply?: string };
-
-  const defaultComments: CommentType[] = [
-    { name: 'Maria do Carmo', time: 'há 2 dias', text: 'Ficou maravilhoso! Meus netos adoraram, não sobrou nenhum pra contar história.' },
-    { name: 'João Pedro', time: 'há 1 semana', text: 'Segui a receita passo a passo e deu super certo. Recomendo usar queijo canastra meia cura se tiverem, dá um toque especial.' },
-    { name: 'Ana Lúcia', time: 'há 2 semanas', text: 'Dá para congelar a massa antes de assar?', reply: 'Pode sim, Ana! Congele as bolinhas separadas em uma forma e depois guarde em saquinhos. Vão direto do congelador pro forno. Ficam ótimos.' }
-  ];
-
-  const [comments, setComments] = useState<CommentType[]>(() => {
-    const saved = localStorage.getItem('vovo_comments');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return defaultComments;
-      }
-    }
-    return defaultComments;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('vovo_comments', JSON.stringify(comments));
-  }, [comments]);
-
+  const [comments, setComments] = useState<CommentType[]>(defaultComments);
   const [newName, setNewName] = useState('');
   const [newText, setNewText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleAddComment = (e: React.FormEvent) => {
+  // Load comments from Supabase on mount
+  useEffect(() => {
+    async function loadComments() {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        const dbComments: CommentType[] = data.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          time: timeAgo(c.created_at),
+          text: c.text,
+        }));
+        setComments([...dbComments, ...defaultComments]);
+      }
+    }
+    loadComments();
+  }, []);
+
+  // Subscribe to new comments in real time
+  useEffect(() => {
+    const channel = supabase
+      .channel('comments-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'comments' }, (payload: any) => {
+        const newComment: CommentType = {
+          id: payload.new.id,
+          name: payload.new.name,
+          time: timeAgo(payload.new.created_at),
+          text: payload.new.text,
+        };
+        setComments(prev => {
+          // Avoid duplicates (if we just inserted it ourselves)
+          if (prev.some(c => c.id === newComment.id)) return prev;
+          return [newComment, ...prev];
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim() || !newText.trim()) return;
-    
-    setComments([
-      { name: newName, time: 'agora mesmo', text: newText },
-      ...comments
-    ]);
+    if (!newName.trim() || !newText.trim() || submitting) return;
+
+    setSubmitting(true);
+
+    const { data, error } = await supabase
+      .from('comments')
+      .insert([{ name: newName.trim(), text: newText.trim() }])
+      .select()
+      .single();
+
+    if (!error && data) {
+      const insertedComment: CommentType = {
+        id: data.id,
+        name: data.name,
+        time: 'agora mesmo',
+        text: data.text,
+      };
+      setComments(prev => [insertedComment, ...prev]);
+    }
+
     setNewName('');
     setNewText('');
+    setSubmitting(false);
   };
 
   return (
@@ -86,7 +148,7 @@ export function BaitPage() {
                 type="text" 
                 value={newName} 
                 onChange={e => setNewName(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }}
                 placeholder="Ex: João da Silva"
               />
             </div>
@@ -95,19 +157,23 @@ export function BaitPage() {
               <textarea 
                 value={newText} 
                 onChange={e => setNewText(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', minHeight: '80px' }}
+                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', minHeight: '80px', boxSizing: 'border-box' }}
                 placeholder="O que achou da receita?"
               />
             </div>
-            <button type="submit" style={{ background: '#FF8C00', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-              Enviar Comentário
+            <button 
+              type="submit" 
+              disabled={submitting}
+              style={{ background: submitting ? '#ccc' : '#FF8C00', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: submitting ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+            >
+              {submitting ? 'Enviando...' : 'Enviar Comentário'}
             </button>
           </form>
 
           <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '5px' }}>Comentários ({comments.length})</h3>
           
           {comments.map((c, i) => (
-            <div key={i} style={{ background: '#fcfcfc', border: '1px solid #eee', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
+            <div key={c.id || `default-${i}`} style={{ background: '#fcfcfc', border: '1px solid #eee', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
               <strong style={{ color: '#444' }}>{c.name}</strong> 
               <span style={{ color: '#999', fontSize: '0.8em', marginLeft: '10px' }}>{c.time}</span>
               <p style={{ margin: '5px 0 0 0' }}>{c.text}</p>

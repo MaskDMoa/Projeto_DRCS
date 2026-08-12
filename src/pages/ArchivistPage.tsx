@@ -1,30 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSlowLoad } from '../hooks/useSlowLoad';
 
 const Marquee = 'marquee' as any;
 
 export function ArchivistPage() {
   const { loading, progress } = useSlowLoad(300, 1500);
-  const [visitorCount, setVisitorCount] = useState('00000');
+  const visitorCount = '00001';
 
   useEffect(() => {
-    // Check if user already visited in this session
-    const hasVisitedThisSession = sessionStorage.getItem('arquivista_visited_session');
-    
-    // We use a new key to effectively "reset" the counter to 0 for everyone
-    const current = localStorage.getItem('arquivista_visitors_v2');
-    let count = current ? parseInt(current, 10) : 0;
-    
-    if (!loading) {
-      if (!hasVisitedThisSession) {
-        count += 1;
-        localStorage.setItem('arquivista_visitors_v2', count.toString());
-        sessionStorage.setItem('arquivista_visited_session', 'true');
-      }
-      setVisitorCount(count.toString().padStart(5, '0'));
-    } else {
-      setVisitorCount(count.toString().padStart(5, '0'));
-    }
+    // Intentionally no logic here anymore for the visitor counter.
+    // We keep the effect just in case we need it for loading side effects later.
   }, [loading]);
 
   if (loading) {
@@ -102,6 +87,9 @@ export function ArchivistPage() {
           <p style={{ lineHeight: '1.6' }}>
             Se alguém aí achar que é mais esperto que eu e quiser "ajudar", fique à vontade pra tentar. Só não venha se gabar depois se travar em algo que eu já resolvi sozinho.
           </p>
+          <p style={{ lineHeight: '1.6', marginTop: '15px' }}>
+            ah, e outra coisa: o guestbook caiu de novo e eu não sei mais consertar, então nem tentem. e se a data lá embaixo parecer errada, não é erro de digitação meu — isso já vem assim há um tempo e eu desisti de entender por quê.
+          </p>
         </section>
 
         <section style={{ marginBottom: '40px', padding: '15px', border: '1px solid #333' }}>
@@ -117,7 +105,18 @@ export function ArchivistPage() {
               <a href="#" style={{ color: '#00ffff', textDecoration: 'underline' }}>não deveria ter escaneado isso em alta qualidade</a>
             </li>
             <li style={{ marginBottom: '10px' }}>
-              <a href="#" style={{ color: '#00ffff', textDecoration: 'underline' }}>o que eu ouvi ontem</a>
+              <a href="/log_interfone.zip" download style={{ color: '#00ffff', textDecoration: 'underline' }}>o que eu ouvi ontem</a> (ou foi isso que a data dizia, pelo menos)
+              <div style={{ padding: '10px', background: '#333', borderLeft: '3px solid #555', marginTop: '10px', fontSize: '0.9em', color: '#ccc', lineHeight: '1.4', fontFamily: '"Courier New", Courier, monospace' }}>
+                vou ser sincero: até eu fiquei incomodado com esse. peguei junto<br/>
+                com um lote de fitas de interfone que ninguém mais tinha catalogado<br/>
+                — mais um bônus de eu ter chegado primeiro no depósito certo.<br/><br/>
+                zipei antes de subir aqui. não porque eu ache que alguém vai chegar<br/>
+                tão longe quanto eu, mas por precaução. não vou facilitar a senha<br/>
+                pra qualquer um — só vou dizer que sou preguiçoso demais pra inventar<br/>
+                senha nova toda vez. uso sempre o mesmo tipo de coisa que eu já<br/>
+                catalogo de qualquer jeito. quem prestou atenção na semana passada<br/>
+                não vai ter trabalho nenhum.
+              </div>
             </li>
             <li style={{ marginBottom: '10px' }}>
               <a href="#" style={{ color: '#00ffff', textDecoration: 'underline' }}>não abram isso no celular</a>

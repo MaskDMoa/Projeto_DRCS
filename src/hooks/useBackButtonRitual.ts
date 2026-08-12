@@ -11,8 +11,9 @@ export function useBackButtonRitual(requiredClicks = 5, windowMs = 5000, redirec
     const padHistory = () => {
       if (!setupRef.current) {
         // Inject history entries to ensure "back" is available
+        // Use unique hashes to force Firefox to register distinct states
         for (let i = 0; i < requiredClicks + 2; i++) {
-          window.history.pushState({ ritual: true }, "");
+          window.history.pushState({ ritual: i }, "", window.location.pathname + "#r" + i);
         }
         setupRef.current = true;
       }
@@ -35,9 +36,8 @@ export function useBackButtonRitual(requiredClicks = 5, windowMs = 5000, redirec
       if (clicks.current.length >= requiredClicks) {
         setUnlocked(true);
         navigate(redirectPath);
-      } else {
         // Push state again so the user doesn't actually leave the page while attempting
-        window.history.pushState({ ritual: true }, "");
+        window.history.pushState({ ritual: clicks.current.length }, "", window.location.pathname + "#r" + Date.now());
       }
     };
 
