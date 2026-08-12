@@ -105,18 +105,7 @@ export function ArchivistPage() {
               <a href="#" style={{ color: '#00ffff', textDecoration: 'underline' }}>não deveria ter escaneado isso em alta qualidade</a>
             </li>
             <li style={{ marginBottom: '10px' }}>
-              <a href="/log_interfone.zip" download style={{ color: '#00ffff', textDecoration: 'underline' }}>o que eu ouvi ontem</a> (ou foi isso que a data dizia, pelo menos)
-              <div style={{ padding: '10px', background: '#333', borderLeft: '3px solid #555', marginTop: '10px', fontSize: '0.9em', color: '#ccc', lineHeight: '1.4', fontFamily: '"Courier New", Courier, monospace' }}>
-                vou ser sincero: até eu fiquei incomodado com esse. peguei junto<br/>
-                com um lote de fitas de interfone que ninguém mais tinha catalogado<br/>
-                — mais um bônus de eu ter chegado primeiro no depósito certo.<br/><br/>
-                zipei antes de subir aqui. não porque eu ache que alguém vai chegar<br/>
-                tão longe quanto eu, mas por precaução. não vou facilitar a senha<br/>
-                pra qualquer um — só vou dizer que sou preguiçoso demais pra inventar<br/>
-                senha nova toda vez. uso sempre o mesmo tipo de coisa que eu já<br/>
-                catalogo de qualquer jeito. quem prestou atenção na semana passada<br/>
-                não vai ter trabalho nenhum.
-              </div>
+              <a href="/log-interfone" style={{ color: '#00ffff', textDecoration: 'underline' }}>o que eu ouvi ontem</a>
             </li>
             <li style={{ marginBottom: '10px' }}>
               <a href="#" style={{ color: '#00ffff', textDecoration: 'underline' }}>não abram isso no celular</a>
